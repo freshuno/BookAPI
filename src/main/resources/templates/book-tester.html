@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Book API Tester</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        button {
+            margin: 0.5rem 0.5rem 1rem 0;
+            padding: 0.5rem 1rem;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 1rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<h1>Book API Tester</h1>
+
+<label for="bookId">ID książki (dla GET, PUT, DELETE):</label>
+<input type="text" id="bookId" placeholder="Np. 1">
+
+<label for="bookData">Dane książki (JSON):</label>
+<textarea id="bookData" rows="6">
+{
+  "title": "Władca Pierścieni",
+  "author": "J.R.R. Tolkien",
+  "publicationYear": 1954
+}
+    </textarea>
+
+<div>
+    <button onclick="sendRequest('GET')">GET /books</button>
+    <button onclick="sendRequest('GET', true)">GET /books/{id}</button>
+    <button onclick="sendRequest('POST')">POST /books</button>
+    <button onclick="sendRequest('PUT')">PUT /books/{id}</button>
+    <button onclick="sendRequest('DELETE')">DELETE /books/{id}</button>
+</div>
+
+<h3>Odpowiedź:</h3>
+<pre id="responseOutput"></pre>
+
+<script>
+    async function sendRequest(method, single = false) {
+        const id = document.getElementById('bookId').value.trim();
+        const data = document.getElementById('bookData').value.trim();
+        const output = document.getElementById('responseOutput');
+
+        let url = '/books';
+        if (single || ['PUT', 'DELETE'].includes(method)) {
+            if (!id) {
+                alert('Podaj ID książki.');
+                return;
+            }
+            url += `/${id}`;
+        }
+
+        try {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (['POST', 'PUT'].includes(method)) {
+                options.body = data;
+            }
+
+            const res = await fetch(url, options);
+            const text = await res.text();
+            output.textContent = `${res.status} ${res.statusText}\n\n${text}`;
+        } catch (err) {
+            output.textContent = `Błąd: ${err.message}`;
+        }
+    }
+</script>
+</body>
+</html>
